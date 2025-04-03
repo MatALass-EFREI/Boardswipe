@@ -118,7 +118,6 @@ export default {
   text-align: center;
   max-width: 600px;
   margin: auto;
-  padding: 20px;
 }
 .question-box h2 {
   font-size: 20px;
