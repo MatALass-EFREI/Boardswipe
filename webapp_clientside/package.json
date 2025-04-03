@@ -2,7 +2,7 @@
   "name": "boardswipe",
   "version": "1.0.0",
   "description": "boardswipe",
-  "author": "roror <roland.fontanes@efrei.net>",
+  "author": "MatAlass <mathieu.alassoeur@efrei.net>",
   "private": true,
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
