@@ -23,9 +23,12 @@ export default {
 
 <style scoped>
 .banner {
-  position: relative;
+  position: absolute; /* Change to absolute to allow it to overlap */
+  top: 0;
+  left: 0;
   width: 100%;
   height: 1000px;
+  z-index: -1; /* Place it behind other elements */
   overflow: hidden;
 }
 
@@ -34,6 +37,7 @@ export default {
   height: 100%;
   object-fit: cover;
 }
+
 
 .banner-text {
   position: absolute;

@@ -58,11 +58,11 @@ body {
 .nav-bar {
   background-color: rgba(51, 51, 51, 0.4);
   padding: 0px;
-  position: fixed;
+  position: relative;
   width: 100%;
   top: 0;
   left: 0;
-  z-index: 1000;
+  z-index: 1;
   height: 85px;
 }
 
