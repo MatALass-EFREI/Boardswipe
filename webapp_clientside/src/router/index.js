@@ -7,6 +7,8 @@ import Blog from "../components/Blog.vue";
 import Login from "../components/Login.vue";
 import Register from "../components/Register.vue";
 import Admin from "../components/Admin.vue";
+import Swipe from "../components/Swipe.vue";
+import UserPanel from "../components/UserPanel.vue";
 
 Vue.use(Router)
 
@@ -63,6 +65,16 @@ export default new Router({
       path: '/admin/:action',
       name: 'Admin',
       component: Admin
+    },
+    {
+      path: '/swipe',
+      name: 'Swipe',
+      component: Swipe,
+    },
+    {
+      path: '/userpanel',
+      name: 'UserPanel',
+      component: UserPanel,
     }
   ]
 })
