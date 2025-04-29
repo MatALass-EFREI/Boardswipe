@@ -8,7 +8,7 @@ app.use(cors());
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'Chipie36', 
+  password: 'root', 
   database: 'boardgamecommunity',
 });
 
