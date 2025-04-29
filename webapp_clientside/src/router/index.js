@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import Home from "../components/Home.vue";
 import Quiz from "../components/Quiz.vue";
 import Games from "../components/Games.vue";
-
+import Blog from "../components/Blog.vue";
 
 Vue.use(Router)
 
@@ -32,6 +32,15 @@ export default new Router({
       path: '/games/:action/:id',
       name: 'Games',
       component: Games
+    },
+    {
+      path: '/blog',
+      redirect: '/blog/list/all',
+    },
+    {
+      path: '/blog/:action/:id',
+      name: 'Blog',
+      component: Blog
     }
   ]
 })
