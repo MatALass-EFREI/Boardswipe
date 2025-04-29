@@ -1,23 +1,30 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+const mysql = require('mysql2');
 const cors = require('cors');
-const dotenv = require('dotenv');
-
-dotenv.config();
-
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(bodyParser.json());
 app.use(cors());
 
-// Routes
-app.get('/', (req, res) => {
-    res.send('Server is running');
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'Chipie36', 
+  database: 'boardgamecommunity',
 });
 
-// Start the server
+db.connect(err => {
+  if (err) throw err;
+  console.log('Connected to database');
+});
+
+app.get('/games', (req, res) => {
+  db.query('SELECT id_game AS id, gameName AS name, gameYearPublished AS releaseDate FROM game', (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
+const PORT = 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

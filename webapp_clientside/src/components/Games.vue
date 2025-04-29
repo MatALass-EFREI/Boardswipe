@@ -44,24 +44,28 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'Games',
   data() {
     return {
-      games: [
-        { id: 1, name: 'Game A', releaseDate: '2022-01-01', rating: 4.5 },
-        { id: 2, name: 'Game B', releaseDate: '2021-05-15', rating: 3.8 },
-        { id: 3, name: 'Game C', releaseDate: '2023-03-10', rating: 4.9 },
-        { id: 4, name: 'Game D', releaseDate: '2020-07-20', rating: 4.2 },
-        { id: 5, name: 'Game E', releaseDate: '2019-11-11', rating: 3.5 },
-        { id: 6, name: 'Game F', releaseDate: '2021-03-25', rating: 4.7 },
-        { id: 7, name: 'Game G', releaseDate: '2022-09-15', rating: 4.0 },
-        { id: 8, name: 'Game H', releaseDate: '2020-01-30', rating: 3.9 },
-        { id: 9, name: 'Game I', releaseDate: '2023-06-05', rating: 4.8 },
-      ],
+      games: [],
       sortBy: 'name',
       sortOrder: 'asc',
     };
+  },
+  created() {
+    axios.get('http://localhost:3000/games')
+      .then(response => {
+        this.games = response.data.map(game => ({
+          ...game,
+          rating: Math.floor(Math.random() * 3) + 3 + Math.random().toFixed(1) // simule une note (car elle n'existe pas dans ta table)
+        }));
+      })
+      .catch(error => {
+        console.error('Error fetching games:', error);
+      });
   },
   computed: {
     sortedGames() {
@@ -70,7 +74,7 @@ export default {
         if (this.sortBy === 'name') {
           return a.name.localeCompare(b.name) * modifier;
         } else if (this.sortBy === 'releaseDate') {
-          return (new Date(a.releaseDate) - new Date(b.releaseDate)) * modifier;
+          return (a.releaseDate - b.releaseDate) * modifier;
         } else if (this.sortBy === 'rating') {
           return (a.rating - b.rating) * modifier;
         }
@@ -93,6 +97,7 @@ export default {
     },
   },
 };
+
 </script>
 
 <style scoped>
