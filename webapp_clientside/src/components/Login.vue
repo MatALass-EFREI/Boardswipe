@@ -15,10 +15,28 @@
       <p>Don't have an account? <router-link to="/register">Register here</router-link></p>
     </form>
   </div>
-
 </template>
 
-<script setup>
+<script>
+export default {
+  data() {
+    return {
+      username: "",
+      password: "",
+      errorMessage: ""
+    };
+  },
+  methods: {
+    handleLogin() {
+      const storedUser = JSON.parse(sessionStorage.getItem("user"));
+      if (storedUser && storedUser.username === this.username && storedUser.password === this.password) {
+        this.$router.push("/userpanel");
+      } else {
+        this.errorMessage = "Invalid username or password.";
+      }
+    }
+  }
+};
 </script>
 
 <style scoped>

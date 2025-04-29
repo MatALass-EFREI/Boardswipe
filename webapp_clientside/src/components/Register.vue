@@ -25,8 +25,33 @@
   </div>
 </template>
 
-<script setup>
-
+<script>
+export default {
+  data() {
+    return {
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      errorMessage: ""
+    };
+  },
+  methods: {
+    handleSubmit() {
+      if (this.password !== this.confirmPassword) {
+        this.errorMessage = "Passwords do not match.";
+        return;
+      }
+      const user = {
+        username: this.username,
+        email: this.email,
+        password: this.password
+      };
+      sessionStorage.setItem("user", JSON.stringify(user));
+      this.$router.push("/login");
+    }
+  }
+};
 </script>
 
 <style scoped>

@@ -8,7 +8,7 @@
           </router-link>
           <router-link to="/" class="nav_bar_button">Home</router-link>
           <router-link to="/games/list/all" class="nav_bar_button games-button">Games</router-link>
-
+          <router-link to="/swipe" class="nav_bar_button games-button">Swipe</router-link>
           <router-link to="/blog" class="nav_bar_button blog-button">Blog</router-link>
           <router-link to="/quiz" class="nav_bar_button">Quiz</router-link>
           <button class="cssbuttons-io-button account-button" @click="$router.push('/login')">Account
