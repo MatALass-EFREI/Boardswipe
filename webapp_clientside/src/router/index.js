@@ -4,6 +4,9 @@ import Home from "../components/Home.vue";
 import Quiz from "../components/Quiz.vue";
 import Games from "../components/Games.vue";
 import Blog from "../components/Blog.vue";
+import Login from "../components/Login.vue";
+import Register from "../components/Register.vue";
+import Admin from "../components/Admin.vue";
 
 Vue.use(Router)
 
@@ -41,6 +44,25 @@ export default new Router({
       path: '/blog/:action/:id',
       name: 'Blog',
       component: Blog
+    },
+    {
+      path: '/login',
+      name: 'Login',
+      component: Login
+    },
+    {
+      path: '/register',
+      name: 'Register',
+      component: Register
+    },
+    {
+      path: '/admin',
+      redirect: '/admin/panel',
+    },
+    {
+      path: '/admin/:action',
+      name: 'Admin',
+      component: Admin
     }
   ]
 })

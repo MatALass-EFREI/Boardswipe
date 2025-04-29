@@ -8,6 +8,7 @@
       </div>
     </div>
     <div v-else-if="action === 'post'" class="blog-post-detail">
+      <button @click="goBack">Back to Games List</button>
       <h2>{{ currentPost ? currentPost.title : 'Article introuvable' }}</h2>
       <p>{{ currentPost ? currentPost.content : 'Le contenu de cet article est introuvable.' }}</p>
     </div>
@@ -52,6 +53,9 @@ export default {
     },
     goToPost(id) {
       this.$router.push(`/blog/post/${id}`);
+    },
+    goBack() {
+        this.$router.push('/blog/list/all');
     },
   },
 };
@@ -100,5 +104,18 @@ export default {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #0077b6;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #005f8a;
 }
 </style>
