@@ -27,4 +27,22 @@ router.get('/sort', async (req, res) => {
     }
 });
 
+router.get('/:id', async (req, res) => {
+    try {
+        const gameId = req.params.id;
+        console.log(`Fetching details for game ID: ${gameId}`);
+
+        const game = await gamesRepo.getGameById(gameId);
+
+        if (!game) {
+            return res.status(404).json({ success: false, message: 'Game not found' });
+        }
+
+        res.json(game);
+    } catch (error) {
+        console.error("Error in /games/:id route:", error);
+        res.status(500).json({ success: false, message: 'Failed to fetch game details' });
+    }
+});
+
 module.exports = router;
