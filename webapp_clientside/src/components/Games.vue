@@ -6,14 +6,14 @@
     <div v-if="!isDetailsView">
       <div class="sort-options">
         <label for="sortBy">Sort by:</label>
-        <select v-model="sortBy" id="sortBy">
+        <select v-model="sortBy" id="sortBy" @change="fetchGames">
           <option value="name">Name</option>
           <option value="releaseDate">Release Date</option>
           <option value="rating">Rating</option>
         </select>
 
         <label for="sortOrder">Order:</label>
-        <select v-model="sortOrder" id="sortOrder">
+        <select v-model="sortOrder" id="sortOrder" @change="fetchGames">
           <option value="asc">Ascending</option>
           <option value="desc">Descending</option>
         </select>
@@ -21,7 +21,7 @@
 
       <div class="games-grid">
         <div
-          v-for="game in sortedGames"
+          v-for="game in games"
           :key="game.id"
           class="game-card"
           @click="goToDetails(game.id)"
@@ -56,30 +56,9 @@ export default {
     };
   },
   created() {
-    axios.get('http://localhost:3000/games')
-      .then(response => {
-        this.games = response.data.map(game => ({
-          ...game,
-          rating: Math.floor(Math.random() * 3) + 3 + Math.random().toFixed(1) // simule une note (car elle n'existe pas dans ta table)
-        }));
-      })
-      .catch(error => {
-        console.error('Error fetching games:', error);
-      });
+    this.fetchGames();
   },
   computed: {
-    sortedGames() {
-      return [...this.games].sort((a, b) => {
-        let modifier = this.sortOrder === 'asc' ? 1 : -1;
-        if (this.sortBy === 'name') {
-          return a.name.localeCompare(b.name) * modifier;
-        } else if (this.sortBy === 'releaseDate') {
-          return (a.releaseDate - b.releaseDate) * modifier;
-        } else if (this.sortBy === 'rating') {
-          return (a.rating - b.rating) * modifier;
-        }
-      });
-    },
     isDetailsView() {
       return this.$route.params.action === 'details';
     },
@@ -89,6 +68,25 @@ export default {
     },
   },
   methods: {
+    fetchGames() {
+      let endpoint = '';
+      if (this.sortBy === 'name') {
+        endpoint = '/games/sortByName';
+      } else if (this.sortBy === 'releaseDate') {
+        endpoint = '/games/sortByReleaseDate';
+      } else if (this.sortBy === 'rating') {
+        endpoint = '/games/sortByRating';
+      }
+
+      axios
+        .get(`http://localhost:3000${endpoint}?order=${this.sortOrder}`)
+        .then((response) => {
+          this.games = response.data;
+        })
+        .catch((error) => {
+          console.error('Error fetching games:', error);
+        });
+    },
     goToDetails(id) {
       this.$router.push(`/games/details/${id}`);
     },
@@ -97,7 +95,6 @@ export default {
     },
   },
 };
-
 </script>
 
 <style scoped>
