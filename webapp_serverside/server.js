@@ -1,8 +1,14 @@
 const express = require('express');
+const cors = require('cors'); // mets ça en haut
 const app = express();
 const gamesApi = require('./controllers/gamesapi.route');
 
-// Middleware
+// Middleware CORS
+app.use(cors({
+    origin: 'http://localhost:8081'
+}));
+
+// Middleware JSON
 app.use(express.json());
 
 // Routes
