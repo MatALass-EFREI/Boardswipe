@@ -37,12 +37,23 @@ export default {
       }
     },
     async handleSwipe(result) {
+       console.log("🟡 Envoi du swipe avec :", {
+        id_game: this.game.id_game,
+        result: result,
+        token: localStorage.getItem('token')
+      });
       try {
         await axios.post('http://localhost:9000/swipe/save', {
           id_game: this.game.id_game, // Ensure id_game is used correctly
-          id_user: 1, // Replace with dynamic user ID if needed
-          result,
-        });
+          result
+        },
+        {
+          headers: {
+            Authorization: 'Bearer ' + localStorage.getItem('token')
+          }
+        }
+      );
+        
         this.fetchRandomGame(); // Load a new game after the swipe
       } catch (error) {
         console.error('Erreur lors de l\'enregistrement du swipe:', error);

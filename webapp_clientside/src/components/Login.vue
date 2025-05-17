@@ -1,7 +1,9 @@
 <template>
   <div class="login-page">
-    <h1>Login</h1>
-    <form @submit.prevent="login">
+    <h1 v-if="!isLoggedIn">Login</h1>
+
+    <!-- Formulaire de login -->
+    <form v-if="!isLoggedIn" @submit.prevent="login">
       <div class="form-group">
         <label for="username">Username:</label>
         <input type="text" id="username" v-model="username" required />
@@ -14,6 +16,12 @@
       <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
       <p>Don't have an account? <router-link to="/register">Register here</router-link></p>
     </form>
+
+    <!-- Zone connectée -->
+    <div v-else class="welcome">
+      <h2>Bienvenue, {{ username }} ! 🎉</h2>
+      <button @click="logout">Se déconnecter</button>
+    </div>
   </div>
 </template>
 
@@ -22,10 +30,31 @@ export default {
   data() {
     return {
       username: '',
-      password: ''
+      password: '',
+      errorMessage: '',
+      isLoggedIn: false
     };
   },
+  mounted() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.isLoggedIn = true;
+      const payload = this.decodeToken(token);
+      if (payload && payload.username) {
+        this.username = payload.username;
+      }
+    }
+  },
   methods: {
+    decodeToken(token) {
+    try {
+      const payloadBase64 = token.split('.')[1];
+      const decoded = atob(payloadBase64);
+      return JSON.parse(decoded);
+    } catch (e) {
+      return null;
+    }
+    },
     async login() {
       try {
         const res = await fetch('http://localhost:9000/auth/login', {
@@ -41,14 +70,23 @@ export default {
 
         if (!res.ok) throw new Error(data.message || 'Login failed');
 
-        // Enregistre le token dans le localStorage
         localStorage.setItem('token', data.token);
+        this.isLoggedIn = true;
+        this.errorMessage = '';
+        const payload = this.decodeToken(data.token);
+        if (payload && payload.username) {
+          this.username = payload.username;
+        }
         alert('✅ Login successful');
-
-        // Rediriger si tu veux : this.$router.push('/games') par exemple
       } catch (error) {
-        alert('❌ ' + error.message);
+        this.errorMessage = error.message;
       }
+    },
+    logout() {
+      localStorage.removeItem('token');
+      this.isLoggedIn = false;
+      this.username = '';
+      this.password = '';
     }
   }
 };
