@@ -3,6 +3,7 @@
     <h1 v-if="isListView">Games List</h1>
     <h1 v-else>Game Details</h1>
 
+    <!-- Games List View -->
     <div v-if="isListView">
       <div class="sort-options">
         <label for="sortBy">Sort by:</label>
@@ -36,17 +37,50 @@
       </div>
     </div>
 
+    <!-- Game Details View -->
     <div v-else-if="game">
-
       <div class="game-details">
-        <h2>{{ game.name }}</h2>
-        <button @click="goBack">Back to Games List</button>
-        <p><strong>Description:</strong> {{ game.description }}</p>
-        <p><strong>Release Date:</strong> {{ game.releaseDate }}</p>
-        <p><strong>Rating:</strong> {{ game.rating }}</p>
-        <p><strong>Min Players:</strong> {{ game.minPlayers }}</p>
-        <p><strong>Max Players:</strong> {{ game.maxPlayers }}</p>
-        <p><strong>Playing Time:</strong> {{ game.playingTime }} minutes</p>
+        <div class="game-header">
+          <button @click="goBack" class="back-button">← Back to Games List</button>
+          <h2>{{ game.name }}</h2>
+        </div>
+        <div class="game-layout">
+          <!-- Description Section -->
+          <div class="game-description">
+            <h3>Description</h3>
+            <p>{{ game.description }}</p>
+          </div>
+          <!-- Details Section -->
+          <div class="game-info">
+            <h3>Details</h3>
+            <p><strong>Release Date:</strong> {{ game.releaseDate }}</p>
+            <p><strong>Rating:</strong> {{ game.rating }}</p>
+            <p><strong>Min Players:</strong> {{ game.minPlayers }}</p>
+            <p><strong>Max Players:</strong> {{ game.maxPlayers }}</p>
+            <p><strong>Playing Time:</strong> {{ game.playingTime }} minutes</p>
+            <p><strong>Minimum Age:</strong> {{ game.minAge }} years</p>
+          </div>
+        </div>
+        <!-- Additional Details Section -->
+        <div v-if="categories.length || publishers.length" class="additional-details">
+          <h3>Additional Details</h3>
+          <div v-if="publishers.length" class="publishers">
+            <h4>Publishers:</h4>
+            <div class="publishers-list">
+              <span v-for="(publisher, index) in publishers" :key="index" class="publisher-block">
+                {{ publisher }}
+              </span>
+            </div>
+          </div>
+          <div v-if="categories.length" class="categories">
+            <h4>Categories:</h4>
+            <div class="categories-list">
+              <span v-for="(category, index) in categories" :key="index" class="category-block">
+                {{ category }}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -63,6 +97,8 @@ export default {
       game: null, // Holds the details of a single game
       sortBy: 'gameName', // Default sort column
       sortOrder: 'asc', // Default sort order
+      categories: [], // Holds the categories of the current game
+      publishers: [], // Holds the publishers of the current game
     };
   },
   computed: {
@@ -100,10 +136,16 @@ export default {
         const response = await axios.get(url);
         this.game = response.data;
 
-        // Replace &#10;&#10; with line breaks in the description
+        // Replace special characters in the description
         if (this.game.description) {
           this.game.description = this.game.description.replace(/&#10;&#10;/g, '\n');
+          this.game.description = this.game.description.replace(/&#10;/g, '');
+          this.game.description = this.game.description.replace(/&#226;&#128;&#147;/g, ';');
         }
+        // Set categories and publishers
+        this.categories = this.game.categories ? this.game.categories.split(',') : [];
+        this.publishers = this.game.publishers ? this.game.publishers.split(',') : [];
+        console.log('Game details fetched:', this.game);
       } catch (error) {
         console.error('Error fetching game details:', error);
       }
@@ -144,7 +186,75 @@ export default {
 }
 
 .game-details {
-  font-family: Arial, sans-serif;
+  background: #f9f9f9;
   padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.back-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  background-color: #0056b3;
+}
+
+.game-layout {
+  display: flex;
+  gap: 20px;
+}
+
+.game-description {
+  flex: 2;
+}
+
+.game-info {
+  flex: 1;
+}
+
+.game-info p {
+  margin: 10px 0;
+}
+
+.game-link {
+  display: inline-block;
+  margin-top: 10px;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.game-link:hover {
+  text-decoration: underline;
+}
+
+.additional-details {
+  margin-top: 30px;
+}
+
+.publishers-list, .categories-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.publisher-block, .category-block {
+  background: #e9ecef;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
 }
 </style>
