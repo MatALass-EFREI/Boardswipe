@@ -1,7 +1,8 @@
 const express = require('express');
-const cors = require('cors'); // mets ça en haut
+const cors = require('cors'); // Import CORS
 const app = express();
 const gamesApi = require('./controllers/gamesapi.route');
+const swipeApi = require('./controllers/swipe.route');
 
 // Middleware CORS
 app.use(cors({
@@ -13,6 +14,7 @@ app.use(express.json());
 
 // Routes
 app.use('/games', gamesApi);
+app.use('/swipe', swipeApi); // Corrected this line
 
 // Start server
 const port = process.env.WEB_PORT || 9000;

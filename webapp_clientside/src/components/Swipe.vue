@@ -1,57 +1,57 @@
 <template>
   <div class="swipe">
-    <div v-if="currentGame" class="game-card">
-      <h2>{{ currentGame.name }}</h2>
-      <p>{{ currentGame.description }}</p>
+    <h1>Swipe Game</h1>
+    <div v-if="game" class="game-card">
+      <h2>{{ game.gameName }}</h2> <!-- Updated to use game.gameName -->
+      <div class="actions">
+        <button class="dislike" @click="handleSwipe(2)">👎 Je n'aime pas</button>
+        <button class="unknown" @click="handleSwipe(0)">🤔 Je ne connais pas</button>
+        <button class="like" @click="handleSwipe(1)">👍 J'aime</button>
+      </div>
     </div>
-    <div v-else class="no-more-games">
-      <h2>Plus de jeux à afficher</h2>
-    </div>
-    <div class="actions" v-if="currentGame">
-      <button class="dislike" @click="dislikeGame">💔</button>
-      <button class="unknown" @click="unknownGame">❓</button>
-      <button class="like" @click="likeGame">❤️</button>
+    <div v-else>
+      <p>Chargement...</p>
     </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
-      games: [
-        { name: "Catan", description: "Un jeu de stratégie et de commerce." },
-        { name: "Uno", description: "Un jeu de cartes amusant et rapide." },
-        { name: "Monopoly", description: "Un classique des jeux de société." }
-      ],
-      currentIndex: 0,
-      likedGames: [],
-      dislikedGames: [],
-      unknownGames: []
+      game: null,
+
     };
   },
-  computed: {
-    currentGame() {
-      return this.games[this.currentIndex] || null;
-    }
-  },
   methods: {
-    likeGame() {
-      this.likedGames.push(this.currentGame);
-      this.nextGame();
+    async fetchRandomGame() {
+      try {
+        const response = await axios.get('http://localhost:9000/swipe/random');
+        console.log('Response from backend:', response.data); // Log the full response
+        this.game = response.data[0]; // Access the first element of the array
+        console.log('Game object in frontend:', this.game); // Log the game object
+      } catch (error) {
+        console.error('Error fetching random game:', error);
+      }
     },
-    dislikeGame() {
-      this.dislikedGames.push(this.currentGame);
-      this.nextGame();
+    async handleSwipe(result) {
+      try {
+        await axios.post('http://localhost:9000/swipe/save', {
+          id_game: this.game.id_game, // Ensure id_game is used correctly
+          id_user: 1, // Replace with dynamic user ID if needed
+          result,
+        });
+        this.fetchRandomGame(); // Load a new game after the swipe
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement du swipe:', error);
+      }
     },
-    unknownGame() {
-      this.unknownGames.push(this.currentGame);
-      this.nextGame();
-    },
-    nextGame() {
-      this.currentIndex++;
-    }
-  }
+  },
+  created() {
+    this.fetchRandomGame();
+  },
 };
 </script>
 
@@ -63,23 +63,24 @@ export default {
 
 .game-card {
   margin-bottom: 20px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.game-image {
-  max-width: 100%;
-  height: auto;
-  border-radius: 10px;
-  margin: 10px 0;
+.actions {
+  margin-top: 20px;
 }
 
 .actions button {
-  font-size: 2em;
+  font-size: 1.2em;
   margin: 0 10px;
   padding: 10px 20px;
   border: none;
-  border-radius: 50%;
+  border-radius: 10px;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s, background-color 0.2s;
 }
 
 .actions button:hover {
@@ -87,22 +88,17 @@ export default {
 }
 
 .like {
-  background-color: #ff6b6b;
+  background-color: #4caf50;
   color: white;
 }
 
 .dislike {
-  background-color: #4a4a4a;
+  background-color: #f44336;
   color: white;
 }
 
 .unknown {
-  background-color: #feca57;
+  background-color: #ff9800;
   color: white;
-}
-
-.no-more-games {
-  font-size: 1.5em;
-  color: #555;
 }
 </style>
