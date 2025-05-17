@@ -1,0 +1,45 @@
+const express = require('express');
+const router = express.Router();
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const usersRepo = require('../utils/users.repository');
+
+const SECRET_KEY = 'caca'; // change pour une vraie clé secrète en prod
+
+router.post('/register', async (req, res) => {
+    const { username, email, password } = req.body;
+
+    try {
+        const existingUser = await usersRepo.findUserByUsername(username);
+        if (existingUser) {
+            return res.status(400).json({ message: 'Username already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await usersRepo.createUser(username, email, hashedPassword);
+
+        res.json({ message: 'User registered successfully' });
+    } catch (error) {
+        console.error("Erreur dans /register :", error); // 🔍 log utile
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+router.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        const user = await usersRepo.findUserByUsername(username);
+        if (!user || !(await bcrypt.compare(password, user.userPassword))) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '1h' });
+        res.json({ message: 'Login successful', token });
+    } catch (error) {
+        console.error("Login error:", error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+module.exports = router;

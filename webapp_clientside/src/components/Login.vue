@@ -1,7 +1,7 @@
 <template>
   <div class="login-page">
     <h1>Login</h1>
-    <form @submit.prevent="handleLogin">
+    <form @submit.prevent="login">
       <div class="form-group">
         <label for="username">Username:</label>
         <input type="text" id="username" v-model="username" required />
@@ -21,18 +21,33 @@
 export default {
   data() {
     return {
-      username: "",
-      password: "",
-      errorMessage: ""
+      username: '',
+      password: ''
     };
   },
   methods: {
-    handleLogin() {
-      const storedUser = JSON.parse(sessionStorage.getItem("user"));
-      if (storedUser && storedUser.username === this.username && storedUser.password === this.password) {
-        this.$router.push("/userpanel");
-      } else {
-        this.errorMessage = "Invalid username or password.";
+    async login() {
+      try {
+        const res = await fetch('http://localhost:9000/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: this.username,
+            password: this.password
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.message || 'Login failed');
+
+        // Enregistre le token dans le localStorage
+        localStorage.setItem('token', data.token);
+        alert('✅ Login successful');
+
+        // Rediriger si tu veux : this.$router.push('/games') par exemple
+      } catch (error) {
+        alert('❌ ' + error.message);
       }
     }
   }
