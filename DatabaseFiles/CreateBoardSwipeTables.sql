@@ -1,3 +1,5 @@
+CREATE DATABASE IF NOT EXISTS boardswipe;
+
 CREATE TABLE User_(
    id_user INT,
    userName VARCHAR(255),
