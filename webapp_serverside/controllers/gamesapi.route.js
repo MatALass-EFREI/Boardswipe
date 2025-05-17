@@ -37,7 +37,6 @@ router.get('/:id', async (req, res) => {
         if (!game) {
             return res.status(404).json({ success: false, message: 'Game not found' });
         }
-
         res.json(game);
     } catch (error) {
         console.error("Error in /games/:id route:", error);
