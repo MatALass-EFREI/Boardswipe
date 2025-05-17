@@ -3902,3 +3902,5 @@ INSERT INTO Category (id_game, IdCategory) VALUES
     (67, '1507c57ab4'),
     (85, '28f6976d32'),
     (44, '67ae303280');
+ALTER TABLE swipe
+ADD COLUMN result INTEGER CHECK (result IN (0, 1, 2));
