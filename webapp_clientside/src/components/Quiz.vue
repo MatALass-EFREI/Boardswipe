@@ -4,6 +4,7 @@
       <h2>Quiz terminé !</h2>
       <p>Score: {{ score }} / {{ questions.length }}</p>
       <button @click="restartQuiz">Rejouer</button>
+      <button @click="$router.push('/leaderboard/1')">Voir le classement</button>
     </div>
     <div v-else-if="firstGame" class="welcome">
       <h2>Bienvenue dans le Quiz !</h2>
@@ -11,6 +12,7 @@
       <p>Vous avez 10 secondes pour répondre à chaque question.</p>
       <p>Bonne chance !</p>
       <button @click="startQuiz">Commencer le Quiz</button>
+      <button @click="$router.push('/leaderboard/1')">Voir le classement</button>
     </div>
     <div v-else class="question-box" :class="{ fadeIn: transitionActive }">
       <h2 v-if="currentQuestion">{{ currentQuestion.text }}</h2>
@@ -35,7 +37,7 @@
 export default {
   data() {
     return {
-      quizId: 1, // Hardcoded for now, can be dynamic later
+      quizId: '1', // ID du quiz
       quizTitle: "",
       questions: [],
       currentQuestionIndex: 0,
@@ -48,7 +50,9 @@ export default {
       timerInterval: null,
       transitionActive: false,
       feedback: "",
-      userId: 1, // Replace with the actual logged-in user ID
+      userId: null, // ID de l'utilisateur
+      questionStartTime: null, // Heure de début de la question
+      totalTime: 0, // Temps total pris pour le quiz
     };
   },
   computed: {
@@ -76,11 +80,12 @@ export default {
     },
     startTimer() {
       this.timer = 10;
+      this.questionStartTime = Date.now(); // Record the start time of the question
       this.timerInterval = setInterval(() => {
         if (this.timer > 0) {
           this.timer--;
         } else {
-          this.selectAnswer(null);
+          this.selectAnswer(null); // Automatically select no answer on timeout
           this.nextQuestion();
         }
       }, 1000);
@@ -94,10 +99,22 @@ export default {
         this.isCorrect = this.currentQuestion && index === this.currentQuestion.answer;
         this.feedback = (this.currentQuestion && this.currentQuestion.feedback) || "";
         if (this.isCorrect) this.score++;
+
+        // Calculate the time taken for this question
+        const timeTakenForQuestion = Math.floor((Date.now() - this.questionStartTime) / 1000);
+        this.totalTime += timeTakenForQuestion; // Add to total time
+
         this.stopTimer();
       }
     },
+
     nextQuestion() {
+      // Ensure time is added if the question was skipped
+      if (this.selectedIndex === null) {
+        const timeTakenForQuestion = Math.floor((Date.now() - this.questionStartTime) / 1000);
+        this.totalTime += timeTakenForQuestion;
+      }
+
       this.transitionActive = true;
       setTimeout(() => {
         this.transitionActive = false;
@@ -120,6 +137,7 @@ export default {
       this.selectedIndex = null;
       this.score = 0;
       this.feedback = "";
+      this.totalTime = 0; // Réinitialise le temps total
       this.startTimer();
     },
     restartQuiz() {
@@ -127,13 +145,11 @@ export default {
     },
     async submitQuizResult() {
       try {
-        const timeTaken = this.questions.length * 10 - this.timer; // Calculate total time
-        const token = localStorage.getItem("authToken"); // Retrieve the token
-
+        const token = localStorage.getItem("token");
         if (!token) {
           console.error("User is not authenticated. Redirecting to login...");
           alert("You need to log in to submit your quiz result.");
-          this.$router.push("/login"); // Redirect to login page (if using Vue Router)
+          this.$router.push("/login");
           return;
         }
 
@@ -141,13 +157,13 @@ export default {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`, // Include the token
+            "Authorization": `Bearer ${token}`,
           },
           body: JSON.stringify({
             id_user: this.userId,
             id_quiz: this.quizId,
             score: this.score,
-            time: timeTaken,
+            time: this.totalTime, // Envoie le temps total
           }),
         });
 
@@ -163,6 +179,12 @@ export default {
     },
   },
   async mounted() {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const payloadBase64 = token.split('.')[1];
+      const decodedPayload = JSON.parse(atob(payloadBase64));
+      this.userId = decodedPayload.id_user; // Récupère l'ID utilisateur depuis le token
+    }
     await this.fetchQuiz();
   },
   beforeDestroy() {

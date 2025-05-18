@@ -61,7 +61,17 @@ router.post('/submit', authenticateToken, async (req, res) => {
         res.status(200).json({ message: 'Résultat enregistré avec succès' });
     } catch (err) {
         console.error('Erreur lors de l’enregistrement du résultat :', err);
+        res.status(500).json({ error: 'Erreur serveur', details: err.message });
+    }
+});
+router.get('/leaderboard/:quizId', async (req, res) => {
+    try {
+        const leaderboard = await quizRepository.getLeaderboardByQuizId(req.params.quizId);
+        res.json(leaderboard);
+    } catch (err) {
+        console.error('Erreur lors de la récupération du leaderboard :', err);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
+
 module.exports = router;

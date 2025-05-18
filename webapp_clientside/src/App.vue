@@ -10,10 +10,10 @@
           <router-link to="/" class="nav_bar_button">Home</router-link>
           <router-link to="/games/list/all" class="nav_bar_button games-button">Games</router-link>
           <router-link to="/swipe" class="nav_bar_button games-button">Swipe</router-link>
-          <router-link to="/blog" class="nav_bar_button blog-button">Blog</router-link>
+          <router-link to="/guild" class="nav_bar_button blog-button">Guild</router-link>
           <router-link to="/quiz" class="nav_bar_button">Quiz</router-link>
           <router-link v-if="isAdmin" to="/admin/users" class="nav_bar_button">Admin</router-link>
-          
+
           <button class="cssbuttons-io-button account-button" @click="handleAccountRedirect">Account
             <div class="icon">
               <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -31,27 +31,26 @@
 
 <script>
 export default {
-  data(){
-    return{
-      isAdmin:false,
-      
+  data() {
+    return {
+      isAdmin: false,
+      isLoggedIn: false, // Add isLoggedIn property
     };
   },
   mounted() {
-  
-  this.isAdmin = localStorage.getItem('role') === 'admin';
-  this.updateRole();
-  window.addEventListener('storage', this.updateRole);
-  
+    this.isAdmin = localStorage.getItem('role') === 'admin';
+    this.isLoggedIn = !!localStorage.getItem('token'); // Check if token exists
+    this.updateRole();
+    window.addEventListener('storage', this.updateRole);
   },
   beforeUnmount() {
-  window.removeEventListener('storage', this.updateRole);
+    window.removeEventListener('storage', this.updateRole);
   },
   methods: {
     updateRole() {
-      this.isAdmin = localStorage.getItem('role') === 'admin'
+      this.isAdmin = localStorage.getItem('role') === 'admin';
+      this.isLoggedIn = !!localStorage.getItem('token'); // Update isLoggedIn
     },
-
     decodeToken(token) {
       try {
         const payloadBase64 = token.split('.')[1];

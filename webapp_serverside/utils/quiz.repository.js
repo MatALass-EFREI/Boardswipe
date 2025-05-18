@@ -26,27 +26,41 @@ module.exports = {
         return result.affectedRows > 0;
     },
     updateUserQuizResult: async (id_user, id_quiz, score, time) => {
-        const [existing] = await pool.query(
-            'SELECT score, time FROM table WHERE id_user = ? AND id_quiz = ?',
-            [id_user, id_quiz]
-        );
+        try {
+            console.log('Received data:', { id_user, id_quiz, score, time });
 
-        if (existing.length > 0) {
-            const { score: existingScore, time: existingTime } = existing[0];
-
-            // Update only if the new score is better or if the score is equal but the time is better
-            if (score > existingScore || (score === existingScore && time < existingTime)) {
-                await pool.query(
-                    'UPDATE table SET score = ?, time = ? WHERE id_user = ? AND id_quiz = ?',
-                    [score, time, id_user, id_quiz]
-                );
-            }
-        } else {
-            // Insert a new record if no existing record is found
-            await pool.query(
-                'INSERT INTO table (id_user, id_quiz, score, time) VALUES (?, ?, ?, ?)',
+            // Insert or update the userleaderboard table
+            const [insertResult] = await pool.query(
+                `INSERT INTO userleaderboard (id_user, id_quiz, score, time)
+             VALUES (?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE
+             score = VALUES(score),
+             time = VALUES(time)`,
                 [id_user, id_quiz, score, time]
             );
+
+            console.log('Insert/Update Result:', insertResult);
+
+            // Call the updateRanks method
+            await module.exports.updateRanks();
+        } catch (error) {
+            console.error('Error in updateUserQuizResult:', error);
+            throw error;
         }
+    },
+    updateRanks: async () => {
+        await pool.query('CALL update_ranks()');
+    },
+
+    getLeaderboardByQuizId: async (quizId) => {
+        const [rows] = await pool.query(
+            `SELECT ul.rank_, u.username AS user_name, ul.score, ul.time
+         FROM userleaderboard ul
+         JOIN user_ u ON ul.id_user = u.id_user
+         WHERE ul.id_quiz = ?
+         ORDER BY ul.rank_ ASC`,
+            [quizId]
+        );
+        return rows;
     },
 };
