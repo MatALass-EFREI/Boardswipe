@@ -7,17 +7,18 @@
     </div>
     <div v-else-if="firstGame" class="welcome">
       <h2>Bienvenue dans le Quiz !</h2>
-      <p>Testez vos connaissances sur les jeux de société.</p>
+      <p>{{ quizTitle }}</p>
       <p>Vous avez 10 secondes pour répondre à chaque question.</p>
       <p>Bonne chance !</p>
       <button @click="startQuiz">Commencer le Quiz</button>
     </div>
     <div v-else class="question-box" :class="{ fadeIn: transitionActive }">
-      <h2>{{ currentQuestion.text }}</h2>
+      <h2 v-if="currentQuestion">{{ currentQuestion.text }}</h2>
+      <p v-else>Chargement de la question...</p>
       <p>Temps restant: {{ timer }}s</p>
       <ul>
         <li
-          v-for="(option, index) in currentQuestion.options"
+          v-for="(option, index) in (currentQuestion && currentQuestion.options) || []"
           :key="index"
           :class="{ correct: selectedIndex === index && isCorrect, incorrect: selectedIndex === index && !isCorrect }"
           @click="selectAnswer(index)">
@@ -34,38 +35,9 @@
 export default {
   data() {
     return {
-      questions: [
-        {
-          text: "Comment gagne-t-on à Uno?",
-          options: ["En accumulant le plus de cartes", "En se débarrassant de toutes ses cartes", "En obtenant 50 points", "En ayant une carte spéciale"],
-          answer: 1,
-          feedback: "Pour gagner à Uno, il faut être le premier à ne plus avoir de cartes."
-        },
-        {
-          text: "Quelle est la condition de victoire aux échecs?",
-          options: ["Capturer toutes les pièces de l'adversaire", "Mettre le roi adverse en échec et mat", "Atteindre l'autre côté de l'échiquier", "Jouer 20 coups sans capture"],
-          answer: 1,
-          feedback: "L'objectif aux échecs est de mettre le roi adverse en échec et mat."
-        },
-        {
-          text: "Combien de wagons faut-il pour jouer à 'Les Aventuriers du Rail' ?",
-          options: ["20", "35", "45", "60"],
-          answer: 2,
-          feedback: "Chaque joueur commence avec 45 wagons dans 'Les Aventuriers du Rail'."
-        },
-        {
-          text: "Dans le jeu 'Catan', que faut-il pour construire une ville ?",
-          options: ["2 blés, 3 pierres", "1 blé, 1 pierre, 2 moutons", "3 argiles, 2 bois", "4 moutons"],
-          answer: 0,
-          feedback: "Pour construire une ville dans 'Catan', vous avez besoin de 2 blés et 3 pierres."
-        },
-        {
-          text: "Comment déclenche-t-on la fin d’une partie de Monopoly ?",
-          options: ["Quand un joueur fait faillite", "Quand toutes les propriétés sont achetées", "Après 3 tours de plateau", "Quand une rue a un hôtel"],
-          answer: 0,
-          feedback: "Une partie de Monopoly se termine généralement lorsqu'un joueur fait faillite."
-        }
-      ],
+      quizId: 1, // Hardcoded for now, can be dynamic later
+      quizTitle: "",
+      questions: [],
       currentQuestionIndex: 0,
       selectedIndex: null,
       score: 0,
@@ -75,15 +47,33 @@ export default {
       timer: 10,
       timerInterval: null,
       transitionActive: false,
-      feedback: ""
+      feedback: "",
+      userId: 1, // Replace with the actual logged-in user ID
     };
   },
   computed: {
     currentQuestion() {
-      return this.questions[this.currentQuestionIndex];
+      return this.questions[this.currentQuestionIndex] || null;
     }
   },
   methods: {
+    async fetchQuiz() {
+      try {
+        const response = await fetch(`http://localhost:9000/quiz/${this.quizId}`);
+        if (!response.ok) throw new Error("Failed to fetch quiz data");
+        const quiz = await response.json();
+
+        this.quizTitle = quiz.quiz_title;
+        this.questions = quiz.questions.map((q) => ({
+          text: q.text,
+          options: q.options,
+          answer: q.answer,
+          feedback: q.feedback
+        }));
+      } catch (error) {
+        console.error("Error fetching quiz:", error);
+      }
+    },
     startTimer() {
       this.timer = 10;
       this.timerInterval = setInterval(() => {
@@ -101,8 +91,8 @@ export default {
     selectAnswer(index) {
       if (this.selectedIndex === null) {
         this.selectedIndex = index;
-        this.isCorrect = index === this.currentQuestion.answer;
-        this.feedback = this.currentQuestion.feedback;
+        this.isCorrect = this.currentQuestion && index === this.currentQuestion.answer;
+        this.feedback = (this.currentQuestion && this.currentQuestion.feedback) || "";
         if (this.isCorrect) this.score++;
         this.stopTimer();
       }
@@ -119,6 +109,7 @@ export default {
         } else {
           this.quizFinished = true;
           this.stopTimer();
+          this.submitQuizResult(); // Submit the result when the quiz is finished
         }
       }, 500);
     },
@@ -133,10 +124,46 @@ export default {
     },
     restartQuiz() {
       this.startQuiz();
-    }
+    },
+    async submitQuizResult() {
+      try {
+        const timeTaken = this.questions.length * 10 - this.timer; // Calculate total time
+        const token = localStorage.getItem("authToken"); // Retrieve the token
+
+        if (!token) {
+          console.error("User is not authenticated. Redirecting to login...");
+          alert("You need to log in to submit your quiz result.");
+          this.$router.push("/login"); // Redirect to login page (if using Vue Router)
+          return;
+        }
+
+        const response = await fetch("http://localhost:9000/quiz/submit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`, // Include the token
+          },
+          body: JSON.stringify({
+            id_user: this.userId,
+            id_quiz: this.quizId,
+            score: this.score,
+            time: timeTaken,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to submit quiz result");
+        }
+
+        const result = await response.json();
+        console.log("Quiz result submitted successfully:", result);
+      } catch (error) {
+        console.error("Error submitting quiz result:", error);
+      }
+    },
   },
-  mounted() {
-    // Timer starts only when the quiz begins
+  async mounted() {
+    await this.fetchQuiz();
   },
   beforeDestroy() {
     this.stopTimer();

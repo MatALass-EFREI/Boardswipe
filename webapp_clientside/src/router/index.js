@@ -9,6 +9,7 @@ import Register from "../components/Register.vue";
 import Admin from "../components/Admin.vue";
 import Swipe from "../components/Swipe.vue";
 import UserPanel from "../components/UserPanel.vue";
+import UserDescription from "../components/UserDescription.vue";
 
 Vue.use(Router)
 
@@ -76,6 +77,12 @@ const router = new Router({
       path: '/userpanel',
       name: 'UserPanel',
       component: UserPanel,
+      meta: { requiresAuth: true }
+    },
+    {
+      path:'/userpanel/description',
+      name:'UserDescription',
+      component: UserDescription,
       meta: { requiresAuth: true }
     }
   ]
