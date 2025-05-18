@@ -7,10 +7,12 @@ module.exports = {
     },
 
     async createUser(username, email, hashedPassword) {
-        await pool.query(
-            'INSERT INTO user_ (userName, userEmail, userPassword) VALUES (?, ?, ?)',
-            [username, email, hashedPassword]
-        );
+        try {
+            await pool.query('CALL AddNewUser(?, ?, ?, ?)', [username, email, hashedPassword, 'user']);
+        } catch (error) {
+            console.error('Error in createUser:', error);
+            throw error;
+        }
     },
     async getUserData(userId) {
         const [rows] = await pool.query('SELECT * FROM user_ WHERE id_user = ?', [userId]);
@@ -28,6 +30,12 @@ module.exports = {
         return rows; // Return all rows as an array
     },
     async updateUserDescription(userId, description) {
-        await pool.query('UPDATE user_ SET userDescription = ? WHERE id_user = ?', [description, userId]);
-    },
+        try {
+            await pool.query('CALL UpdateUserDescription(?, ?)', [userId, description]);
+        } catch (error) {
+            console.error('Error in updateUserDescription:', error);
+            throw error;
+        }
+    }
+
 };

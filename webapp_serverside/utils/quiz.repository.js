@@ -63,4 +63,13 @@ module.exports = {
         );
         return rows;
     },
+    async getQuizLeaderboard() {
+        try {
+            const [rows] = await pool.query('SELECT * FROM QuizLeaderboard');
+            return rows;
+        } catch (error) {
+            console.error('Error in getQuizLeaderboard:', error);
+            throw error;
+        }
+    },
 };
