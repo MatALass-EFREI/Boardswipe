@@ -6,6 +6,7 @@
       <input v-model="email" placeholder="Email" />
       <input v-model="password" type="password" placeholder="Password" />
       <button @click="register">Register</button>
+      <button @click="login">Back to login</button>
     </div>
   </div>
 </template>
@@ -40,6 +41,9 @@ export default {
       } catch (error) {
         alert('❌ ' + error.message);
       }
+    },
+    login() {
+      this.$router.push('/login');
     }
   }
 };
