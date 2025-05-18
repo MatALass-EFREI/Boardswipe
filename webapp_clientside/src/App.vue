@@ -12,7 +12,7 @@
           <router-link to="/swipe" class="nav_bar_button games-button">Swipe</router-link>
           <router-link to="/guild" class="nav_bar_button blog-button">Guild</router-link>
           <router-link to="/quiz" class="nav_bar_button">Quiz</router-link>
-          <router-link v-if="isAdmin" to="/admin/users" class="nav_bar_button">Admin</router-link>
+
 
           <button class="cssbuttons-io-button account-button" @click="handleAccountRedirect">Account
             <div class="icon">
@@ -51,6 +51,7 @@ export default {
       this.isAdmin = localStorage.getItem('role') === 'admin';
       this.isLoggedIn = !!localStorage.getItem('token'); // Update isLoggedIn
     },
+
     decodeToken(token) {
       try {
         const payloadBase64 = token.split('.')[1];
@@ -62,11 +63,7 @@ export default {
     },
     handleAccountRedirect() {
       if (this.isLoggedIn) {
-        if (this.isAdmin) {
-          this.$router.push('/admin/panel');
-        } else {
-          this.$router.push('/userpanel');
-        }
+        this.$router.push('/userpanel');
       } else {
         this.$router.push('/login'); // Redirect to login if not logged in
       }
