@@ -4,9 +4,10 @@ const app = express();
 const gamesApi = require('./controllers/gamesapi.route');
 const authRoutes = require('./controllers/auth.controller'); // Ajoute cette ligne
 const swipeApi= require('./controllers/swipe.route');
+
 // Middleware CORS
 app.use(cors({
-    origin: 'http://localhost:8080'
+    origin: /http:\/\/localhost:\d+$/, // Allows any localhost with any port
 }));
 
 // Middleware JSON
