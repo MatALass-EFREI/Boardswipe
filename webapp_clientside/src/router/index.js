@@ -12,17 +12,16 @@ import UserPanel from "../components/UserPanel.vue";
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   routes: [
     {
       path: '/home',
       name: 'Home',
       component: Home
-    }
-    ,
+    },
     {
-      path:'/',
-      redirect:'/home',
+      path: '/',
+      redirect: '/home',
     },
     {
       path: '/quiz',
@@ -30,8 +29,8 @@ export default new Router({
       component: Quiz
     },
     {
-      path : '/games',
-      redirect : '/games/list/all',
+      path: '/games',
+      redirect: '/games/list/all',
     },
     {
       path: '/games/:action/:id',
@@ -64,17 +63,20 @@ export default new Router({
     {
       path: '/admin/:action',
       name: 'Admin',
-      component: Admin
+      component: Admin,
+      meta: { requiresAuth: true, requiresAdmin: true }
     },
     {
       path: '/swipe',
       name: 'Swipe',
       component: Swipe,
+      meta: { requiresAuth: true }
     },
     {
       path: '/userpanel',
       name: 'UserPanel',
       component: UserPanel,
+      meta: { requiresAuth: true }
     },
     {
     path: '/admin/users',
@@ -82,4 +84,25 @@ export default new Router({
     component: () => import("../components/Admin.vue")
     }
   ]
-})
+});
+
+// Navigation guard to check authentication
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token');
+  const isLoggedIn = !!token;
+
+  if (to.matched.some(record => record.meta.requiresAuth) && !isLoggedIn) {
+    next('/login'); // Redirect to login if not logged in
+  } else if (to.matched.some(record => record.meta.requiresAdmin)) {
+    const payload = token ? JSON.parse(atob(token.split('.')[1])) : null;
+    if (payload && payload.role === 'admin') {
+      next(); // Allow access for admin
+    } else {
+      next('/login'); // Redirect to login if not an admin
+    }
+  } else {
+    next(); // Allow access
+  }
+});
+
+export default router;

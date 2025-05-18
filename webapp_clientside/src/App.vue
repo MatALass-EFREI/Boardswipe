@@ -1,3 +1,4 @@
+
 <template>
   <div id="app">
     <nav class="nav-bar">
@@ -12,7 +13,8 @@
           <router-link to="/blog" class="nav_bar_button blog-button">Blog</router-link>
           <router-link to="/quiz" class="nav_bar_button">Quiz</router-link>
           <router-link v-if="isAdmin" to="/admin/users" class="nav_bar_button">Admin</router-link>
-          <button class="cssbuttons-io-button account-button" @click="$router.push('/login')">Account
+          
+          <button class="cssbuttons-io-button account-button" @click="handleAccountRedirect">Account
             <div class="icon">
               <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M0 0h24v24H0z" fill="none"></path>
@@ -32,11 +34,11 @@ export default {
   data(){
     return{
       isAdmin:false,
-      username: ''
+      
     };
   },
   mounted() {
-  this.username = localStorage.getItem('username');
+  
   this.isAdmin = localStorage.getItem('role') === 'admin';
   this.updateRole();
   window.addEventListener('storage', this.updateRole);
@@ -48,9 +50,29 @@ export default {
   methods: {
     updateRole() {
       this.isAdmin = localStorage.getItem('role') === 'admin'
-    }
-  }
-  
+    },
+
+    decodeToken(token) {
+      try {
+        const payloadBase64 = token.split('.')[1];
+        const decoded = atob(payloadBase64);
+        return JSON.parse(decoded);
+      } catch (e) {
+        return null;
+      }
+    },
+    handleAccountRedirect() {
+      if (this.isLoggedIn) {
+        if (this.isAdmin) {
+          this.$router.push('/admin/panel');
+        } else {
+          this.$router.push('/userpanel');
+        }
+      } else {
+        this.$router.push('/login'); // Redirect to login if not logged in
+      }
+    },
+  },
 };
 </script>
 
