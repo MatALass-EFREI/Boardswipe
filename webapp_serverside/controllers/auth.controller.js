@@ -20,7 +20,7 @@ router.post('/register', async (req, res) => {
 
         res.json({ message: 'User registered successfully' });
     } catch (error) {
-        console.error("Erreur dans /register :", error); // 🔍 log utile
+        console.error("Error in /register:", error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });

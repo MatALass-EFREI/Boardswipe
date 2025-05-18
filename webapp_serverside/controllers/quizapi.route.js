@@ -3,6 +3,16 @@ const router = express.Router();
 const quizRepository = require('../utils/quiz.repository');
 const authenticateToken = require('../utils/auth.middleware');
 
+router.get('/leaderboard', async (req, res) => {
+    try {
+        const leaderboard = await quizRepository.getQuizLeaderboard();
+        res.status(200).json(leaderboard);
+    } catch (error) {
+        console.error('Error in /quiz/leaderboard:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 router.get('/all', async (req, res) => {
     try {
         const quizzes = await quizRepository.getAllQuizzes();
@@ -73,5 +83,7 @@ router.get('/leaderboard/:quizId', async (req, res) => {
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
+
+
 
 module.exports = router;

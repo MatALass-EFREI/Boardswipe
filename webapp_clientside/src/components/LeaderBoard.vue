@@ -15,8 +15,8 @@
       </thead>
       <tbody>
       <tr v-for="(entry, index) in leaderboard" :key="index">
-        <td>{{ entry.rank_ }}</td>
-        <td>{{ entry.user_name }}</td>
+        <td>{{ entry.rank }}</td>
+        <td>{{ entry.username }}</td>
         <td>{{ entry.score }}</td>
         <td>{{ entry.time }}s</td>
       </tr>
@@ -38,7 +38,7 @@ export default {
   methods: {
     async fetchLeaderboard() {
       try {
-        const response = await fetch(`http://localhost:9000/quiz/leaderboard/${this.quizId}`);
+        const response = await fetch(`http://localhost:9000/quiz/leaderboard`);
         if (!response.ok) throw new Error('Failed to fetch leaderboard');
         this.leaderboard = await response.json();
       } catch (error) {
