@@ -96,7 +96,6 @@ const router = new Router({
       path:'/leaderboard/:id',
       name:'LeaderBoard',
       component: LeaderBoard,
-      meta: { requiresAuth: true }
     },
     {
       path: '/guild',

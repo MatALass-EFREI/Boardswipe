@@ -5,7 +5,7 @@
       <p><strong>Username:</strong> {{ username }}</p>
       <p><strong>Email:</strong> {{ email }}</p>
       <h1>Description</h1>
-      <p>{{userDescription}}</p>
+      <p>{{ userDescription }}</p>
       <button @click="changeDescription">Change Description</button>
       <div>
         <h2>Liked Games</h2>
@@ -31,6 +31,7 @@
           </span>
         </div>
       </div>
+      <button v-if="isAdmin" @click="goToAdmin">Admin</button>
       <button @click="logout">Logout</button>
     </div>
   </div>
@@ -46,7 +47,8 @@ export default {
       likedGames: [],
       dislikedGames: [],
       isLoggedIn: false,
-      userDescription:[],
+      isAdmin: false,
+      userDescription: [],
     };
   },
   methods: {
@@ -61,6 +63,7 @@ export default {
         const payloadBase64 = token.split('.')[1];
         const decoded = JSON.parse(atob(payloadBase64));
         const userId = decoded.id_user;
+        this.isAdmin = decoded.role === 'admin'; // Check if the user is an admin
 
         const res = await fetch(`http://localhost:9000/user/profile/${userId}`, {
           headers: {
@@ -84,10 +87,7 @@ export default {
     },
     async fetchUserSwipes() {
       const token = localStorage.getItem('token');
-      if (!token) {
-        console.error("❌ Token is missing.");
-        return;
-      }
+      if (!token) return;
 
       try {
         const payloadBase64 = token.split('.')[1];
@@ -103,19 +103,18 @@ export default {
         if (!res.ok) throw new Error('Failed to fetch user swipes');
 
         const data = await res.json();
-        console.log("🔍 Swipe data received:", data);
 
-        // Filter and map the data to include game names
+        // Filter games based on the result field
         this.likedGames = data.filter(game => game.result === 1).map(game => game.gameName);
         this.dislikedGames = data.filter(game => game.result === 2).map(game => game.gameName);
-
-        console.log("👍 Liked games:", this.likedGames);
-        console.log("👎 Disliked games:", this.dislikedGames);
       } catch (error) {
         console.error('Error fetching user swipes:', error);
       }
     },
-    changeDescription(){
+    goToAdmin() {
+      this.$router.push('/admin/users'); // Redirect to admin users page
+    },
+    changeDescription() {
       this.$router.push('/userpanel/description');
     },
     logout() {

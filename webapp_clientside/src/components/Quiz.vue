@@ -147,10 +147,8 @@ export default {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          console.error("User is not authenticated. Redirecting to login...");
-          alert("You need to log in to submit your quiz result.");
-          this.$router.push("/login");
-          return;
+          console.warn("User is not authenticated. Skipping result submission.");
+          return; // Skip the request if the user is not logged in
         }
 
         const response = await fetch("http://localhost:9000/quiz/submit", {
@@ -163,7 +161,7 @@ export default {
             id_user: this.userId,
             id_quiz: this.quizId,
             score: this.score,
-            time: this.totalTime, // Envoie le temps total
+            time: this.totalTime, // Send the total time
           }),
         });
 
