@@ -64,7 +64,8 @@ export default {
     handleAccountRedirect() {
       if (this.isLoggedIn) {
         this.$router.push('/userpanel');
-      } else {
+      }
+      else {
         this.$router.push('/login'); // Redirect to login if not logged in
       }
     },
