@@ -78,6 +78,7 @@ export default {
           this.username = payload.username;
         }
         alert('✅ Login successful');
+        this.$router.push('/userpanel'); // Redirect to /userpanel after login
       } catch (error) {
         this.errorMessage = error.message;
       }
