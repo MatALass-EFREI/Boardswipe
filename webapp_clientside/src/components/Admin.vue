@@ -1,55 +1,33 @@
 <template>
-  <div class="admin">
-
-    <div v-if="action === 'panel' " class="admin-panel">
-      <h1>Admin Panel</h1>
-      <div class="admin-section">
-        <h2>Manage Users</h2>
-        <p>Here you can manage users, view statistics, and perform administrative tasks.</p>
-        <button @click="goToUserManagement">User Management</button>
-        <button @click="goToStatistics">View Statistics</button>
-        <button @click="goToSettings">Settings</button>
-      </div>
-
-      <div class="admin-section">
-        <h2>Manage Games</h2>
-        <p>Here you can manage games, view statistics, and perform administrative tasks.</p>
-        <button @click="goToGameManagement">Game Management</button>
-        <button @click="goToStatistics">View Statistics</button>
-        <button @click="goToSettings">Settings</button>
-      </div>
-
-      <div class="admin-section">
-        <h2>Manage Blog</h2>
-        <p>Here you can manage blog posts, view statistics, and perform administrative tasks.</p>
-        <button @click="goToBlogManagement">Blog Management</button>
-        <button @click="goToStatistics">View Statistics</button>
-        <button @click="goToSettings">Settings</button>
-      </div>
-    </div>
+  <div>
+    <h2>Liste des utilisateurs</h2>
+    <ul>
+      <li v-for="user in users" :key="user.id_user">
+        {{ user.userName }} – {{ user.userEmail }} – {{ user.role }}
+      </li>
+    </ul>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Admin',
-  methods: {
-    goToUserManagement() {
-      this.$router.push('/admin/user-management');
-    },
-    goToGameManagement() {
-      this.$router.push('/admin/game-management');
-    },
-    goToBlogManagement() {
-      this.$router.push('/admin/blog-management');
-    },
-    goToStatistics() {
-      this.$router.push('/admin/statistics');
-    },
-    goToSettings() {
-      this.$router.push('/admin/settings');
-    },
+  data() {
+    return {
+      users: []
+    };
   },
+  async mounted() {
+    try {
+      const res = await fetch('http://localhost:9000/admin/users', {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('token')
+        }
+      });
+      this.users = await res.json();
+    } catch (err) {
+      console.error('Erreur chargement utilisateurs:', err);
+    }
+  }
 };
 </script>
 

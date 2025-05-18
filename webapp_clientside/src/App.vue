@@ -11,6 +11,7 @@
           <router-link to="/swipe" class="nav_bar_button games-button">Swipe</router-link>
           <router-link to="/blog" class="nav_bar_button blog-button">Blog</router-link>
           <router-link to="/quiz" class="nav_bar_button">Quiz</router-link>
+          <router-link v-if="isAdmin" to="/admin/users" class="nav_bar_button">Admin</router-link>
           <button class="cssbuttons-io-button account-button" @click="$router.push('/login')">Account
             <div class="icon">
               <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -28,8 +29,29 @@
 
 <script>
 export default {
-  name: 'App'
-}
+  data(){
+    return{
+      isAdmin:false,
+      username: ''
+    };
+  },
+  mounted() {
+  this.username = localStorage.getItem('username');
+  this.isAdmin = localStorage.getItem('role') === 'admin';
+  this.updateRole();
+  window.addEventListener('storage', this.updateRole);
+  
+  },
+  beforeUnmount() {
+  window.removeEventListener('storage', this.updateRole);
+  },
+  methods: {
+    updateRole() {
+      this.isAdmin = localStorage.getItem('role') === 'admin'
+    }
+  }
+  
+};
 </script>
 
 <style>
