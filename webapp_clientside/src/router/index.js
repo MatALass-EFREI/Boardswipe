@@ -9,6 +9,9 @@ import Register from "../components/Register.vue";
 import Admin from "../components/Admin.vue";
 import Swipe from "../components/Swipe.vue";
 import UserPanel from "../components/UserPanel.vue";
+import UserDescription from "../components/UserDescription.vue";
+import LeaderBoard from "../components/LeaderBoard.vue";
+import Guild from "../components/Guild.vue";
 
 Vue.use(Router)
 
@@ -79,9 +82,31 @@ const router = new Router({
       meta: { requiresAuth: true }
     },
     {
+      path:'/userpanel/description',
+      name:'UserDescription',
+      component: UserDescription,
+      meta: { requiresAuth: true }
+    },
+    {
     path: '/admin/users',
     name: 'AdminUsers',
     component: () => import("../components/Admin.vue")
+    },
+    {
+      path:'/leaderboard/:id',
+      name:'LeaderBoard',
+      component: LeaderBoard,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/guild',
+      name: 'Guild',
+      component: Guild,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/guild/all',
+      redirect: '/guild'
     }
   ]
 });

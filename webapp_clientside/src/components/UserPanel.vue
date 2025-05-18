@@ -1,16 +1,36 @@
 <template>
   <div class="user-panel">
-    <div v-if="!isLoggedIn">
-
-    </div>
-
-    <div v-else class="user-info">
+    <div v-if="isLoggedIn" class="user-info">
       <h1>User Panel</h1>
       <p><strong>Username:</strong> {{ username }}</p>
       <p><strong>Email:</strong> {{ email }}</p>
-      <p><strong>Games Played:</strong> {{ gamesPlayed }}</p>
-      <p><strong>Games Liked:</strong> {{ gamesLiked }}</p>
-      <p><strong>Games Disliked:</strong> {{ gamesDisliked }}</p>
+      <h1>Description</h1>
+      <p>{{userDescription}}</p>
+      <button @click="changeDescription">Change Description</button>
+      <div>
+        <h2>Liked Games</h2>
+        <div class="liked-games-list">
+          <span
+            v-for="(gameName, index) in likedGames"
+            :key="index"
+            class="game-block"
+          >
+            {{ gameName }}
+          </span>
+        </div>
+      </div>
+      <div>
+        <h2>Disliked Games</h2>
+        <div class="disliked-games-list">
+          <span
+            v-for="(gameName, index) in dislikedGames"
+            :key="index"
+            class="game-block"
+          >
+            {{ gameName }}
+          </span>
+        </div>
+      </div>
       <button @click="logout">Logout</button>
     </div>
   </div>
@@ -23,10 +43,10 @@ export default {
       username: '',
       email: '',
       registrationDate: '',
-      gamesPlayed: 0,
-      gamesLiked: 0,
-      gamesDisliked: 0,
+      likedGames: [],
+      dislikedGames: [],
       isLoggedIn: false,
+      userDescription:[],
     };
   },
   methods: {
@@ -55,13 +75,48 @@ export default {
         this.email = data.userEmail;
         this.registrationDate = data.registrationDate || 'N/A';
         this.gamesPlayed = data.gamesPlayed || 0;
-        this.gamesLiked = data.gamesLiked || 0;
-        this.gamesDisliked = data.gamesDisliked || 0;
         this.isLoggedIn = true;
+        this.userDescription = data.userDescription || 'No description available';
       } catch (error) {
         console.error('Error fetching user profile:', error);
         this.isLoggedIn = false;
       }
+    },
+    async fetchUserSwipes() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error("❌ Token is missing.");
+        return;
+      }
+
+      try {
+        const payloadBase64 = token.split('.')[1];
+        const decoded = JSON.parse(atob(payloadBase64));
+        const userId = decoded.id_user;
+
+        const res = await fetch(`http://localhost:9000/user/swipe/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error('Failed to fetch user swipes');
+
+        const data = await res.json();
+        console.log("🔍 Swipe data received:", data);
+
+        // Filter and map the data to include game names
+        this.likedGames = data.filter(game => game.result === 1).map(game => game.gameName);
+        this.dislikedGames = data.filter(game => game.result === 2).map(game => game.gameName);
+
+        console.log("👍 Liked games:", this.likedGames);
+        console.log("👎 Disliked games:", this.dislikedGames);
+      } catch (error) {
+        console.error('Error fetching user swipes:', error);
+      }
+    },
+    changeDescription(){
+      this.$router.push('/userpanel/description');
     },
     logout() {
       localStorage.removeItem('token');
@@ -70,6 +125,7 @@ export default {
   },
   mounted() {
     this.fetchUserProfile();
+    this.fetchUserSwipes();
   },
 };
 </script>
@@ -83,6 +139,10 @@ export default {
 h1 {
   text-align: center;
   margin-bottom: 20px;
+}
+
+h2 {
+  margin-top: 20px;
 }
 
 .user-info {
@@ -101,5 +161,22 @@ button {
 
 button:hover {
   background-color: #005f8a;
+}
+
+.liked-games-list,
+.disliked-games-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.game-block {
+  background: #e9ecef;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
 }
 </style>
