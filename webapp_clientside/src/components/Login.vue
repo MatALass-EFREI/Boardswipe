@@ -69,11 +69,13 @@ export default {
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.message || 'Login failed');
-
+        const payload = JSON.parse(atob(data.token.split('.')[1]));
         localStorage.setItem('token', data.token);
+        localStorage.setItem('role', payload.role);
+        localStorage.setItem('username', payload.username);
         this.isLoggedIn = true;
         this.errorMessage = '';
-        const payload = this.decodeToken(data.token);
+        
         if (payload && payload.username) {
           this.username = payload.username;
         }
@@ -85,6 +87,8 @@ export default {
     },
     logout() {
       localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      window.dispatchEvent(new Event('storage'));
       this.isLoggedIn = false;
       this.username = '';
       this.password = '';

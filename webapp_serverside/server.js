@@ -4,6 +4,7 @@ const app = express();
 const gamesApi = require('./controllers/gamesapi.route');
 const authRoutes = require('./controllers/auth.controller'); // Ajoute cette ligne
 const swipeApi= require('./controllers/swipe.route');
+const adminRoutes = require('./controllers/admin.route');
 const userApi = require('./controllers/userapi.route');
 const quizApi = require('./controllers/quizapi.route');
 
@@ -18,7 +19,7 @@ app.use(express.json());
 // Routes
 app.use('/games', gamesApi);
 app.use('/swipe', swipeApi); // Corrected this line
-
+app.use('/admin', adminRoutes);
 app.use('/auth', authRoutes); // Ajoute cette ligne
 app.use('/user', userApi); // Ajoute cette ligne
 app.use('/quiz', quizApi); // Ajoute cette ligne

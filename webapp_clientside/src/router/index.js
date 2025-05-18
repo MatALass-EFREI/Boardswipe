@@ -84,6 +84,11 @@ const router = new Router({
       name:'UserDescription',
       component: UserDescription,
       meta: { requiresAuth: true }
+    },
+    {
+    path: '/admin/users',
+    name: 'AdminUsers',
+    component: () => import("../components/Admin.vue")
     }
   ]
 });
